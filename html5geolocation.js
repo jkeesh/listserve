@@ -4,7 +4,7 @@
   var firebaseRef = new Firebase(firebaseUrl);
 
   // Create a new GeoFire instance at the random Firebase location
-  var geoFire = new GeoFire(firebaseRef);
+  // var geoFire = new GeoFire(firebaseRef);
 
   /* Uses the HTML5 geolocation API to get the current user's location */
   var getLocation = function() {
@@ -19,24 +19,25 @@
   var getCurrentUsers = function() {
     firebaseRef.on('child_added', function(childSnapshot, prevChildKey) {
         var snapshot = childSnapshot.val();
-        addPointToMap(snapshot.l[0], snapshot.l[1]);
+        console.log(snapshot);
+        addPointToMap(snapshot.latitude, snapshot.longitude, snapshot.name);
     });
   }
 
-  var addPointToMap = function(lat, long) {
+  var addPointToMap = function(lat, long, name) {
     log("adding point " + lat + " " + long);
     var pos = new google.maps.LatLng(lat, long);
 
     var infowindow = new google.maps.InfoWindow({
         position: pos, 
         map: map, 
-        content:"You are here!"
+        content: name
     });
-    // var marker = new google.maps.Marker({
-    //     position: pos, 
-    //     map: map, 
-    //     title:"You are here!"
-    // });
+    var marker = new google.maps.Marker({
+        position: pos, 
+        map: map, 
+        title: name
+    });
   }
 
   var randomNumber = function() {
@@ -66,18 +67,30 @@
     // for testing
     // addRandomPoint();
 
-    geoFire.set(username, [latitude, longitude]).then(function() {
-      log("Current user " + username + "'s location has been added to GeoFire");
+    // geoFire.set(username, [latitude, longitude]).then(function() {
+    //   log("Current user " + username + "'s location has been added to GeoFire");
 
-      // When the user disconnects from Firebase (e.g. closes the app, exits the browser),
-      // remove their GeoFire entry
-      firebaseRef.child(username).onDisconnect().remove();
+    //   // When the user disconnects from Firebase (e.g. closes the app, exits the browser),
+    //   // remove their GeoFire entry
+    //   firebaseRef.child(username).onDisconnect().remove();
 
-      log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
-      log("You can use the link above to verify that " + username + " was removed from GeoFire after you close this page.");
-    }).catch(function(error) {
-      log("Error adding user " + username + "'s location to GeoFire");
+    //   log("Added handler to remove user " + username + " from GeoFire when you leave this page.");
+    //   log("You can use the link above to verify that " + username + " was removed from GeoFire after you close this page.");
+    // }).catch(function(error) {
+    //   log("Error adding user " + username + "'s location to GeoFire");
+    // });
+
+    var childRef = firebaseRef.push();
+
+    childRef.set({
+      name: username,
+      latitude: latitude,
+      longitude: longitude
     });
+
+    // when the user disconnects, remove it
+    childRef.onDisconnect().remove()
+
   }
 
   /* Handles any errors from trying to get the user's current location */
