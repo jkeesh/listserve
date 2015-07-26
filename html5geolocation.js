@@ -16,13 +16,56 @@
     }
   };
 
+  var getCurrentUsers = function() {
+    firebaseRef.on('child_added', function(childSnapshot, prevChildKey) {
+        var snapshot = childSnapshot.val();
+        addPointToMap(snapshot.l[0], snapshot.l[1]);
+    });
+  }
+
+  var addPointToMap = function(lat, long) {
+    log("adding point " + lat + " " + long);
+    var pos = new google.maps.LatLng(lat, long);
+
+    var infowindow = new google.maps.InfoWindow({
+        position: pos, 
+        map: map, 
+        content:"You are here!"
+    });
+    // var marker = new google.maps.Marker({
+    //     position: pos, 
+    //     map: map, 
+    //     title:"You are here!"
+    // });
+  }
+
+  var randomNumber = function() {
+    var num = Math.random() * 100;
+    if(Math.random() < 0.5){
+      num *= -1;
+    }
+    return num;
+  }
+
+  var addRandomPoint = function() {
+    // addPointToMap(randomNumber(), randomNumber());
+  }
+
   /* Callback method from the geolocation API which receives the current user's location */
   var geolocationCallback = function(location) {
-    var latitude = location.coords.latitude;
-    var longitude = location.coords.longitude;
+    // var latitude = location.coords.latitude;
+    // var longitude = location.coords.longitude;
+
+    var latitude = randomNumber();
+    var longitude = randomNumber();
+
     log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
-    var username = "wesley";
+    // addPointToMap(location.coords.latitude, location.coords.longitude);
+  
+    // for testing
+    // addRandomPoint();
+
     geoFire.set(username, [latitude, longitude]).then(function() {
       log("Current user " + username + "'s location has been added to GeoFire");
 
@@ -52,6 +95,8 @@
 
   // Get the current user's location
   getLocation();
+
+  getCurrentUsers();
 
   /* Logs to the page instead of the console */
   function log(message) {
