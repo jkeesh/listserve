@@ -54,11 +54,11 @@
 
   /* Callback method from the geolocation API which receives the current user's location */
   var geolocationCallback = function(location) {
-    // var latitude = location.coords.latitude;
-    // var longitude = location.coords.longitude;
+    var latitude = location.coords.latitude;
+    var longitude = location.coords.longitude;
 
-    var latitude = randomNumber();
-    var longitude = randomNumber();
+    // var latitude = randomNumber();
+    // var longitude = randomNumber();
 
     log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
