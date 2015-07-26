@@ -40,7 +40,7 @@
   }
 
   var randomNumber = function() {
-    var num = Math.random() * 100;
+    var num = Math.random() * 70;
     if(Math.random() < 0.5){
       num *= -1;
     }
