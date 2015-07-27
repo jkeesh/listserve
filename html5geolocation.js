@@ -21,6 +21,8 @@
         var snapshot = childSnapshot.val();
         console.log(snapshot);
         addPointToMap(snapshot.latitude, snapshot.longitude, snapshot.name);
+
+        addUser(snapshot.name);
     });
   }
 
@@ -131,11 +133,18 @@
 
   getCurrentUsers();
 
+  function addUser(user) {
+    var childDiv = document.createElement("div");
+    var textNode = document.createTextNode(user);
+    childDiv.appendChild(textNode);
+    document.getElementById("log").appendChild(childDiv);    
+  }
+
   /* Logs to the page instead of the console */
   function log(message) {
-    var childDiv = document.createElement("div");
-    var textNode = document.createTextNode(message);
-    childDiv.appendChild(textNode);
-    document.getElementById("log").appendChild(childDiv);
+    // var childDiv = document.createElement("div");
+    // var textNode = document.createTextNode(message);
+    // childDiv.appendChild(textNode);
+    // document.getElementById("log").appendChild(childDiv);
   }
 })();
