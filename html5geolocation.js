@@ -22,14 +22,7 @@
   };
 
   firebaseRef.on('child_changed', function(childSnapshot, prevChildKey) {
-    console.log("CHILD CHANGE");
-    console.log(prevChildKey);
-    console.log(childSnapshot.val());
-
-    console.log(childSnapshot.key())
-
-    console.log(allPoints);
-
+    // update the info window to contain the new name of the user
     allPoints[childSnapshot.key()].infowindow.setContent(childSnapshot.val().name);
   });
 
@@ -109,14 +102,15 @@
 
   /* Callback method from the geolocation API which receives the current user's location */
   var geolocationCallback = function(location) {
-    // var latitude = location.coords.latitude;
-    // var longitude = location.coords.longitude;
+    var latitude = location.coords.latitude;
+    var longitude = location.coords.longitude;
 
-    // latitude = latitude.toFixed(2);
-    // longitude = longitude.toFixed(2);
+    latitude = latitude.toFixed(2);
+    longitude = longitude.toFixed(2);
 
-    var latitude = randomNumber();
-    var longitude = randomNumber();
+    // comment in for random lat/long
+    // var latitude = randomNumber();
+    // var longitude = randomNumber();
 
     curUserLatitude = latitude;
     curUserLongitude = longitude;
