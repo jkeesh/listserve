@@ -1,7 +1,12 @@
 (function() {
   // Generate a random Firebase location
-  var firebaseUrl = "https://listserve.firebaseio.com/";
+  var firebaseUrl = "https://listserve.firebaseio.com/locations";
   var firebaseRef = new Firebase(firebaseUrl);
+  var curUserLatitude, curUserLongitude;
+
+  var childRef;
+
+  var allPoints = {};
 
   // Create a new GeoFire instance at the random Firebase location
   // var geoFire = new GeoFire(firebaseRef);
@@ -16,17 +21,29 @@
     }
   };
 
+  firebaseRef.on('child_changed', function(childSnapshot, prevChildKey) {
+    console.log("CHILD CHANGE");
+    console.log(prevChildKey);
+    console.log(childSnapshot.val());
+
+    console.log(childSnapshot.key())
+
+    console.log(allPoints);
+
+    allPoints[childSnapshot.key()].infowindow.setContent(childSnapshot.val().name);
+  });
+
   var getCurrentUsers = function() {
     firebaseRef.on('child_added', function(childSnapshot, prevChildKey) {
         var snapshot = childSnapshot.val();
         console.log(snapshot);
-        addPointToMap(snapshot.latitude, snapshot.longitude, snapshot.name);
+        addPointToMap(snapshot.latitude, snapshot.longitude, snapshot.name, childSnapshot.key());
 
         addUser(snapshot.name);
     });
   }
 
-  var addPointToMap = function(lat, long, name) {
+  var addPointToMap = function(lat, long, name, key) {
     log("adding point " + lat + " " + long);
     var pos = new google.maps.LatLng(lat, long);
 
@@ -57,6 +74,13 @@
       console.log("hi");
       infowindow.open(map, marker);
     });
+
+
+    allPoints[key] = {
+      circle: circle,
+      infowindow: infowindow,
+      marker: marker
+    }
   }
 
   var randomNumber = function() {
@@ -71,16 +95,31 @@
     // addPointToMap(randomNumber(), randomNumber());
   }
 
+  var updateUsername = function(username) {
+    if(!username || !curUserLatitude || !curUserLongitude){
+      return;
+    }
+
+    childRef.set({
+      name: username,
+      latitude: curUserLatitude,
+      longitude: curUserLongitude
+    });
+  }
+
   /* Callback method from the geolocation API which receives the current user's location */
   var geolocationCallback = function(location) {
-    var latitude = location.coords.latitude;
-    var longitude = location.coords.longitude;
+    // var latitude = location.coords.latitude;
+    // var longitude = location.coords.longitude;
 
-    latitude = latitude.toFixed(2);
-    longitude = longitude.toFixed(2);
+    // latitude = latitude.toFixed(2);
+    // longitude = longitude.toFixed(2);
 
-    // var latitude = randomNumber();
-    // var longitude = randomNumber();
+    var latitude = randomNumber();
+    var longitude = randomNumber();
+
+    curUserLatitude = latitude;
+    curUserLongitude = longitude;
 
     log("Retrieved user's location: [" + latitude + ", " + longitude + "]");
 
@@ -102,7 +141,7 @@
     //   log("Error adding user " + username + "'s location to GeoFire");
     // });
 
-    var childRef = firebaseRef.push();
+    childRef = firebaseRef.push();
 
     childRef.set({
       name: username,
@@ -147,4 +186,57 @@
     // childDiv.appendChild(textNode);
     // document.getElementById("log").appendChild(childDiv);
   }
+
+  // // CREATE A REFERENCE TO FIREBASE
+  var messagesUrl = "https://listserve.firebaseio.com/messages";
+  var messagesRef = new Firebase(messagesUrl);
+
+  // // REGISTER DOM ELEMENTS
+  var messageField = $('#messageInput');
+  var nameField = $('#nameInput');
+  var messageList = $('#example-messages');
+
+  var username = "anon";
+
+  // LISTEN FOR KEYPRESS EVENT
+  messageField.keypress(function (e) {
+    if (e.keyCode == 13) {
+      //FIELD VALUES
+      username = nameField.val();
+      var message = messageField.val();
+
+      //SAVE DATA TO FIREBASE AND EMPTY FIELD
+      messagesRef.push({name:username, text:message});
+      messageField.val('');
+    }
+  });
+
+  nameField.keyup(function (e) {
+      username = nameField.val();
+      // setUserStatus('online');
+
+      updateUsername(username);
+  });
+
+  // Add a callback that is triggered for each chat message.
+  messagesRef.limitToLast(10).on('child_added', function (snapshot) {
+    //GET DATA
+    var data = snapshot.val();
+    var username = data.name || "anonymous";
+    var message = data.text;
+
+    //CREATE ELEMENTS MESSAGE & SANITIZE TEXT
+    var messageElement = $("<li>");
+    var nameElement = $("<strong class='example-chat-username'></strong>")
+    nameElement.text(username);
+    messageElement.text(message).prepend(nameElement);
+
+    //ADD MESSAGE
+    messageList.append(messageElement)
+
+    //SCROLL TO BOTTOM OF MESSAGE LIST
+    messageList[0].scrollTop = messageList[0].scrollHeight;
+  });
+
+
 })();
