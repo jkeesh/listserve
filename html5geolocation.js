@@ -28,15 +28,32 @@
     log("adding point " + lat + " " + long);
     var pos = new google.maps.LatLng(lat, long);
 
+    var circleOptions = {
+      strokeColor: '#FF0000',
+      strokeOpacity: 0.8,
+      strokeWeight: 2,
+      fillColor: '#FF0000',
+      fillOpacity: 0.35,
+      map: map,
+      center: pos,
+      radius: 100000
+    };
+    // Add the circle for this city to the map.
+    var circle = new google.maps.Circle(circleOptions);
+
+
+
     var infowindow = new google.maps.InfoWindow({
-        position: pos, 
-        map: map, 
         content: name
     });
     var marker = new google.maps.Marker({
         position: pos, 
         map: map, 
         title: name
+    });
+    google.maps.event.addListener(marker, 'click', function() {
+      console.log("hi");
+      infowindow.open(map, marker);
     });
   }
 
@@ -56,6 +73,9 @@
   var geolocationCallback = function(location) {
     var latitude = location.coords.latitude;
     var longitude = location.coords.longitude;
+
+    latitude = latitude.toFixed(2);
+    longitude = longitude.toFixed(2);
 
     // var latitude = randomNumber();
     // var longitude = randomNumber();
